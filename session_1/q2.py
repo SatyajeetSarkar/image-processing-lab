@@ -1,56 +1,35 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
 
-# Read image in grayscale
-image = cv2.imread("lena.png", cv2.IMREAD_GRAYSCALE)
+# Read grayscale image
+image = cv2.imread("lena.png", 0)
 
-# Check if image was loaded successfully
 if image is None:
-    print("Error: Could not read the image.")
-    exit()
+    print("Image not found")
+else:
+    print("Image loaded successfully")
 
+# A. Increase brightness
+bright = cv2.add(image, 50)
 
-brightness_increased = cv2.add(image, 50)
+# B. Decrease brightness
+dark = cv2.subtract(image, 50)
 
-brightness_decreased = cv2.subtract(image, 50)
+# C. Increase contrast
+high_contrast = cv2.convertScaleAbs(image, alpha=1.5, beta=0)
 
+# D. Decrease contrast
+low_contrast = cv2.convertScaleAbs(image, alpha=0.5, beta=0)
 
-contrast_increased = cv2.convertScaleAbs(
-    image,
-    alpha=1.5,
-    beta=0
-)
-
-contrast_decreased = cv2.convertScaleAbs(
-    image,
-    alpha=0.5,
-    beta=0
-)
-
-
+# E. Generate negative image
 negative = 255 - image
 
-threshold_value = 128
-
-_, binary = cv2.threshold(
-    image,
-    threshold_value,
-    255,
-    cv2.THRESH_BINARY
+# F. Binary thresholding
+_, threshold = cv2.threshold(
+    image, 127, 255, cv2.THRESH_BINARY
 )
 
-
-images = [
-    image,
-    brightness_increased,
-    brightness_decreased,
-    contrast_increased,
-    contrast_decreased,
-    negative,
-    binary
-]
-
+# Display all images
 titles = [
     "Original Image",
     "Increased Brightness",
@@ -58,56 +37,20 @@ titles = [
     "Increased Contrast",
     "Decreased Contrast",
     "Negative Image",
-    "Binary Threshold"
+    "Binary Thresholding"
 ]
 
-plt.figure(figsize=(12, 8))
+images = [
+    image, bright, dark, high_contrast,
+    low_contrast, negative, threshold
+]
 
-for i in range(len(images)):
-    plt.subplot(2, 4, i + 1)
-    plt.imshow(images[i], cmap="gray")
+plt.figure(figsize=(12, 9))
+
+for i in range(7):
+    plt.subplot(3, 3, i + 1)
+    plt.imshow(images[i], cmap="gray", vmin=0, vmax=255)
     plt.title(titles[i])
-    plt.axis("off")
-
-plt.tight_layout()
-plt.show()
-
-
-manual_brightness = image.astype(np.int16) + 50
-
-# Keep values within 0-255
-manual_brightness = np.clip(manual_brightness, 0, 255)
-
-# Convert back to uint8
-manual_brightness = manual_brightness.astype(np.uint8)
-
-
-manual_negative = 255 - image
-
-
-manual_binary = np.where(image >= 128, 255, 0)
-
-manual_binary = manual_binary.astype(np.uint8)
-
-
-manual_images = [
-    manual_brightness,
-    manual_negative,
-    manual_binary
-]
-
-manual_titles = [
-    "Manual Brightness - NumPy",
-    "Manual Negative - NumPy",
-    "Manual Binary Threshold - NumPy"
-]
-
-plt.figure(figsize=(12, 4))
-
-for i in range(len(manual_images)):
-    plt.subplot(1, 3, i + 1)
-    plt.imshow(manual_images[i], cmap="gray")
-    plt.title(manual_titles[i])
     plt.axis("off")
 
 plt.tight_layout()
